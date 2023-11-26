@@ -121,8 +121,13 @@ export const ChatPage = () => {
 
   const handleLogout = React.useCallback(async () => {
     // Implement your logout logic here
+    if (wechatId) {
+      await api.post('wechat/logout', {
+        wechatId,
+      });
+    }
     navigate('/'); // Redirect to the login page after logout
-  }, [navigate]);
+  }, [navigate, wechatId]);
 
   const onArrowClick = (add: number) => {
     const currentIndex = parseInt(selectedIndex);
