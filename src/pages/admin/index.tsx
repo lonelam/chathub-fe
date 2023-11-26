@@ -132,7 +132,10 @@ export const AdminPage = () => {
         {renderTokenForm('pad-local')}
         {renderTokenList(padLocalTokens, 'pad-local')}
       </div>
-      <EditSystemMessages />
+      <div>
+        <h2 className="mb-2 mt-4 flex items-center justify-between text-lg font-semibold">Chat Sessions</h2>
+        <EditSystemMessages />
+      </div>
     </div>
   );
 };

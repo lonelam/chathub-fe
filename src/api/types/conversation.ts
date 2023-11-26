@@ -13,6 +13,11 @@ export interface Friend {
   avatarUrl: string;
 }
 
+export const FeatureFlags = {
+  GptCompletionFeature: 1 << 0,
+  AutoReplyFeature: 1 << 1,
+};
+
 export interface Conversation {
   id: number;
   conversationId: string;
@@ -21,4 +26,5 @@ export interface Conversation {
   wechatAccount: WechatAccount;
   friends: Friend[];
   historyMessages: HistoryMessage[];
+  featureFlags: number;
 }

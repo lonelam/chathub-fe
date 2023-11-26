@@ -1,11 +1,17 @@
-const { createProxyMiddleware } = require("http-proxy-middleware");
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 module.exports = function (app) {
   app.use(
-    "/api",
+    // '/api',
+    // createProxyMiddleware({
+    //   target: 'http://localhost:3333',
+    //   changeOrigin: true,
+    // }),
+    '/api',
     createProxyMiddleware({
-      target: "http://localhost:3000",
+      target: 'https://chub.laizn.com',
       changeOrigin: true,
+      auth: 'chathubuser:chathub.123',
     }),
   );
 };

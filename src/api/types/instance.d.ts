@@ -63,6 +63,14 @@ export interface PostApiTypeMap {
       sessionId: number;
       message: string;
     },
+    never,
+  ];
+  'wechat/update/feature': [
+    {
+      sessionId: number;
+      feature: number;
+    },
+    never,
   ];
 }
 export class ApiInstance extends AxiosInstance {

@@ -1,14 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import api from 'api';
 import { ConversationFace } from 'components/conversation-face';
 import { Conversation } from 'api/types/conversation';
 import { FiRefreshCw, FiArrowLeft, FiArrowRight, FiSend, FiLogOut } from 'react-icons/fi';
-
+export enum HeaderContentEnum {
+  Blank = 0,
+  SystemMessage,
+  ModulusNumber,
+}
 export const ChatPage = () => {
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [chatSessions, setChatSessions] = useState<Conversation[]>([]);
   const [activeMessage, _setActiveMessage] = useState('');
+  const [headerContentType, _setHeaderContentType] = useState(0);
   const lastInputActiveTime = useRef(0);
   const lastSentMessage = useRef('');
   const chatScrollDivRef = useRef<HTMLDivElement>(null);
@@ -25,6 +30,12 @@ export const ChatPage = () => {
     } else {
       _setActiveMessage(msg);
     }
+  }, []);
+
+  const updateHeaderContentType = React.useCallback(() => {
+    _setHeaderContentType((t) => {
+      return (t + 1) % HeaderContentEnum.ModulusNumber;
+    });
   }, []);
 
   const handleInput = React.useCallback(() => {
@@ -61,7 +72,7 @@ export const ChatPage = () => {
         }
         return selectedConversation;
       });
-      if (Date.now() - lastInputActiveTime.current > 60 * 1000) {
+      if (selectedConversation.activeMessage && Date.now() - lastInputActiveTime.current > 60 * 1000) {
         setActiveMessage(selectedConversation.activeMessage);
         setTimeout(handleInput);
       }
@@ -78,6 +89,15 @@ export const ChatPage = () => {
       clearInterval(intervalHandler);
     };
   }, [fetchChatSessions, wechatId, selectedIndex]);
+
+  const headerContentStr = useMemo(() => {
+    switch (headerContentType) {
+      case HeaderContentEnum.Blank:
+        return '';
+      case HeaderContentEnum.SystemMessage:
+        return conversation?.systemMessage || '';
+    }
+  }, [conversation?.systemMessage, headerContentType]);
 
   const sayCurrentText = () => {
     if (!conversation || !wechatId) {
@@ -116,7 +136,9 @@ export const ChatPage = () => {
   return (
     <div className="flex h-screen flex-col">
       <div className="flex items-center justify-between bg-blue-500 p-4 text-white">
-        <h1 className="text-lg font-semibold">{conversation.systemMessage}</h1>
+        <h1 className="h-full flex-1 text-lg font-semibold" onClick={updateHeaderContentType}>
+          {headerContentStr}
+        </h1>
         <div>
           <button onClick={fetchChatSessions} className="mx-1 text-white">
             <FiRefreshCw className="animate-spin" />
