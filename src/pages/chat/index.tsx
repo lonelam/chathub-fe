@@ -39,13 +39,22 @@ export const ChatPage = () => {
     });
   }, []);
 
+  const handleChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const msg = e.target.value;
+      lastInputActiveTime.current = Date.now();
+      setActiveMessage(msg);
+    },
+    [setActiveMessage],
+  );
+
   const handleInput = React.useCallback(() => {
     const target = textareaRef.current;
     if (!target) {
       return;
     }
     target.style.height = 'auto';
-    target.style.height = `${Math.min(target.scrollHeight, 80)}px`;
+    target.style.height = `${Math.min(target.scrollHeight, 75)}px`;
   }, []);
   const fetchChatSessions = React.useCallback(async () => {
     if (!wechatId) {
@@ -148,7 +157,7 @@ export const ChatPage = () => {
   };
 
   if (!conversation || !wechatId) {
-    return <NotFoundPage />;
+    return null;
   }
 
   return (
@@ -192,10 +201,10 @@ export const ChatPage = () => {
         <textarea
           ref={textareaRef}
           value={activeMessage}
-          onChange={(e) => setActiveMessage(e.target.value)}
+          onChange={handleChange}
           onKeyDown={handleEnterPress}
           onInput={handleInput}
-          className="mx-2 flex-grow resize-none overflow-hidden rounded border border-gray-300 p-2"
+          className="mx-2 flex-grow resize-none overflow-hidden overflow-y-auto rounded border border-gray-300 p-1"
           placeholder="Type a message"
           rows={1}
         />
