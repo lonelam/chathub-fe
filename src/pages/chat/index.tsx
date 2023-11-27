@@ -4,6 +4,7 @@ import api from 'api';
 import { ConversationFace } from 'components/conversation-face';
 import { Conversation } from 'api/types/conversation';
 import { FiRefreshCw, FiArrowLeft, FiArrowRight, FiSend, FiLogOut } from 'react-icons/fi';
+import { NotFoundPage } from 'pages/not-found';
 export enum HeaderContentEnum {
   ConversationName = 0,
   SystemMessage,
@@ -147,7 +148,7 @@ export const ChatPage = () => {
   };
 
   if (!conversation || !wechatId) {
-    return null;
+    return <NotFoundPage />;
   }
 
   return (
