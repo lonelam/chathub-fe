@@ -5,7 +5,7 @@ import { ConversationFace } from 'components/conversation-face';
 import { Conversation } from 'api/types/conversation';
 import { FiRefreshCw, FiArrowLeft, FiArrowRight, FiSend, FiLogOut } from 'react-icons/fi';
 export enum HeaderContentEnum {
-  Blank = 0,
+  ConversationName = 0,
   SystemMessage,
   ModulusNumber,
 }
@@ -44,7 +44,7 @@ export const ChatPage = () => {
       return;
     }
     target.style.height = 'auto';
-    target.style.height = `${target.scrollHeight}px`;
+    target.style.height = `${Math.min(target.scrollHeight, 80)}px`;
   }, []);
   const fetchChatSessions = React.useCallback(async () => {
     if (!wechatId) {
@@ -56,12 +56,16 @@ export const ChatPage = () => {
         params: { wechat_id: wechatId },
       });
 
-      let selectedConversation = response.data.data[0];
+      let selectedConversation: null | Conversation = response.data.data[0];
       if (selectedIndex) {
         selectedConversation = response.data.data[parseInt(selectedIndex)];
       }
       setConversation((prevConv) => {
-        if (selectedConversation.historyMessages.length !== prevConv?.historyMessages.length) {
+        if (
+          selectedConversation &&
+          prevConv &&
+          selectedConversation.historyMessages.length !== prevConv.historyMessages.length
+        ) {
           const target = chatScrollDivRef.current;
           if (!target) {
             return selectedConversation;
@@ -72,7 +76,12 @@ export const ChatPage = () => {
         }
         return selectedConversation;
       });
-      if (selectedConversation.activeMessage && Date.now() - lastInputActiveTime.current > 60 * 1000) {
+
+      if (
+        selectedConversation &&
+        selectedConversation.activeMessage &&
+        Date.now() - lastInputActiveTime.current > 60 * 1000
+      ) {
         setActiveMessage(selectedConversation.activeMessage);
         setTimeout(handleInput);
       }
@@ -91,13 +100,16 @@ export const ChatPage = () => {
   }, [fetchChatSessions, wechatId, selectedIndex]);
 
   const headerContentStr = useMemo(() => {
-    switch (headerContentType) {
-      case HeaderContentEnum.Blank:
-        return '';
-      case HeaderContentEnum.SystemMessage:
-        return conversation?.systemMessage || '';
+    if (!conversation) {
+      return '';
     }
-  }, [conversation?.systemMessage, headerContentType]);
+    switch (headerContentType) {
+      case HeaderContentEnum.ConversationName:
+        return conversation.friends[0]?.name;
+      case HeaderContentEnum.SystemMessage:
+        return conversation.systemMessage;
+    }
+  }, [conversation, headerContentType]);
 
   const sayCurrentText = () => {
     if (!conversation || !wechatId) {
