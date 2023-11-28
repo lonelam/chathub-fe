@@ -48,7 +48,7 @@ const ConversationCard: React.FC<{ session: Conversation; fetchData: () => void 
   return (
     <div className="mb-4 max-w-xl flex-1 rounded-lg bg-white p-4 shadow-lg">
       <div className="text-sm text-gray-500">ID: {session.id}</div>
-      <div className="text-sm text-gray-500">Chatter: {session.friends[0].name}</div>
+      <div className="text-sm text-gray-500">Chatter: {session.friends[0]?.name}</div>
       <div className="mt-2">
         <label className="font-semibold text-gray-700">System Message:</label>
         <textarea

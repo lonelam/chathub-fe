@@ -6,6 +6,7 @@ import { Conversation } from 'api/types/conversation';
 import { FiRefreshCw, FiArrowLeft, FiArrowRight, FiSend, FiLogOut, FiHome } from 'react-icons/fi';
 import { NotFoundPage } from 'pages/not-found';
 import { WechatAccount } from 'api/types/accounts';
+import { FaRobot } from 'react-icons/fa';
 export enum HeaderContentEnum {
   ConversationName = 0,
   SystemMessage,
@@ -18,6 +19,7 @@ export const ChatPage = () => {
   const [activeMessage, _setActiveMessage] = useState('');
   const [headerContentType, _setHeaderContentType] = useState(0);
   const [refreshing, setRefreshing] = useState(true);
+  const [gptCompleting, setGptCompleting] = useState(false);
   const lastInputActiveTime = useRef(0);
   const lastSentMessage = useRef('');
   const chatScrollDivRef = useRef<HTMLDivElement>(null);
@@ -115,6 +117,28 @@ export const ChatPage = () => {
     }
   }, [fetchChatSessions, wechatId, selectedIndex, refreshing]);
 
+  const handleRefreshActiveMessageClick = React.useCallback(async () => {
+    if (!conversation || !wechatId) {
+      return;
+    }
+    try {
+      setGptCompleting(true);
+      const { data } = await api.post('wechat/complete-chat-session', { sessionId: conversation.id });
+      setConversation(data.data);
+      setActiveMessage(data.data.activeMessage);
+      setChatSessions(
+        chatSessions.map((c) => {
+          if (c.id === data.data.id) {
+            return { ...c, activeMessage: data.data.activeMessage };
+          }
+          return c;
+        }),
+      );
+    } catch (err) {
+      console.error(err);
+    }
+    setGptCompleting(false);
+  }, [chatSessions, conversation, setActiveMessage, wechatId]);
   const handleRefreshClick = React.useCallback(() => {
     setRefreshing((r) => !r);
   }, []);
@@ -225,10 +249,18 @@ export const ChatPage = () => {
           onChange={handleChange}
           onKeyDown={handleEnterPress}
           onInput={handleInput}
+          disabled={gptCompleting}
           className="mx-2 flex-grow resize-none overflow-hidden overflow-y-auto rounded border border-gray-300 p-1"
           placeholder="Type a message"
           rows={1}
         />
+        <button
+          disabled={gptCompleting}
+          onClick={handleRefreshActiveMessageClick}
+          className={`m-1 rounded-full ${gptCompleting ? 'bg-gray-500' : 'bg-orange-300'} p-2 text-white`}
+        >
+          <FaRobot />
+        </button>
         <button onClick={sayCurrentText} className="rounded-full bg-blue-500 p-2 text-white">
           <FiSend />
         </button>

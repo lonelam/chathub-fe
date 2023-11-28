@@ -66,6 +66,14 @@ export interface PostApiTypeMap {
     },
     never,
   ];
+  'wechat/complete-chat-session': [
+    {
+      sessionId: number;
+    },
+    {
+      data: Conversation;
+    },
+  ];
   'wechat/update/feature': [
     {
       sessionId: number;
