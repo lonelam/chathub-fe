@@ -18,7 +18,8 @@ export interface GetApiTypeMap {
   'wechat/chat-sessions': [
     { wechat_id: string },
     {
-      data: Conversation[];
+      chatSessions: Conversation[];
+      wechatAccount: WechatAccount | null;
     },
   ];
   'wechat/admin/sessions': [

@@ -5,6 +5,7 @@ import { ConversationFace } from 'components/conversation-face';
 import { Conversation } from 'api/types/conversation';
 import { FiRefreshCw, FiArrowLeft, FiArrowRight, FiSend, FiLogOut, FiHome } from 'react-icons/fi';
 import { NotFoundPage } from 'pages/not-found';
+import { WechatAccount } from 'api/types/accounts';
 export enum HeaderContentEnum {
   ConversationName = 0,
   SystemMessage,
@@ -12,9 +13,11 @@ export enum HeaderContentEnum {
 }
 export const ChatPage = () => {
   const [conversation, setConversation] = useState<Conversation | null>(null);
+  const [account, setAccount] = useState<WechatAccount | null>(null);
   const [chatSessions, setChatSessions] = useState<Conversation[]>([]);
   const [activeMessage, _setActiveMessage] = useState('');
   const [headerContentType, _setHeaderContentType] = useState(0);
+  const [refreshing, setRefreshing] = useState(true);
   const lastInputActiveTime = useRef(0);
   const lastSentMessage = useRef('');
   const chatScrollDivRef = useRef<HTMLDivElement>(null);
@@ -66,9 +69,9 @@ export const ChatPage = () => {
         params: { wechat_id: wechatId },
       });
 
-      let selectedConversation: null | Conversation = response.data.data[0];
+      let selectedConversation: null | Conversation = response.data.chatSessions[0];
       if (selectedIndex) {
-        selectedConversation = response.data.data[parseInt(selectedIndex)];
+        selectedConversation = response.data.chatSessions[parseInt(selectedIndex)];
       }
       setConversation((prevConv) => {
         if (
@@ -95,7 +98,8 @@ export const ChatPage = () => {
         setActiveMessage(selectedConversation.activeMessage);
         setTimeout(handleInput);
       }
-      setChatSessions(response.data.data);
+      setAccount(response.data.wechatAccount);
+      setChatSessions(response.data.chatSessions);
     } catch (error) {
       console.error('Error fetching chat sessions:', error);
     }
@@ -103,11 +107,17 @@ export const ChatPage = () => {
 
   useEffect(() => {
     fetchChatSessions();
-    const intervalHandler = setInterval(fetchChatSessions, 5000);
-    return () => {
-      clearInterval(intervalHandler);
-    };
-  }, [fetchChatSessions, wechatId, selectedIndex]);
+    if (refreshing) {
+      const intervalHandler = setInterval(fetchChatSessions, 5000);
+      return () => {
+        clearInterval(intervalHandler);
+      };
+    }
+  }, [fetchChatSessions, wechatId, selectedIndex, refreshing]);
+
+  const handleRefreshClick = React.useCallback(() => {
+    setRefreshing((r) => !r);
+  }, []);
 
   const headerContentStr = useMemo(() => {
     if (!conversation) {
@@ -166,7 +176,11 @@ export const ChatPage = () => {
 
   return (
     <div className="flex h-screen flex-col">
-      <div className="flex items-center justify-between bg-blue-500 p-4 text-white">
+      <div
+        className={`flex items-center justify-between ${
+          account?.isLogin ? 'bg-blue-500' : 'bg-gray-500'
+        } p-4 text-white`}
+      >
         <h1 className="h-full flex-1 text-lg font-semibold" onClick={updateHeaderContentType}>
           {headerContentStr}
         </h1>
@@ -174,8 +188,8 @@ export const ChatPage = () => {
           <button>
             <FiHome onClick={handleGoHome} className="mx-1 text-white" />
           </button>
-          <button onClick={fetchChatSessions} className="mx-1 text-white">
-            <FiRefreshCw className="animate-spin" />
+          <button onClick={handleRefreshClick} className="mx-1 text-white">
+            <FiRefreshCw className={refreshing ? 'animate-spin' : ''} />
           </button>
           <button onClick={handleLogout} className="mx-1 text-white">
             <FiLogOut />
