@@ -2,6 +2,7 @@ import React from 'react';
 import api from 'api';
 import { FiCheck, FiToggleLeft, FiToggleRight } from 'react-icons/fi';
 import { Conversation, FeatureFlags } from 'api/types/conversation';
+import { FaRobot } from 'react-icons/fa';
 
 const ConversationCard: React.FC<{ session: Conversation; fetchData: () => void }> = (props) => {
   const { session, fetchData } = props;
@@ -10,6 +11,7 @@ const ConversationCard: React.FC<{ session: Conversation; fetchData: () => void 
 
   const isAutoReplyEnabled = (session.featureFlags & FeatureFlags.AutoReplyFeature) !== 0;
   const isGptCompletionEnabled = (session.featureFlags & FeatureFlags.GptCompletionFeature) !== 0;
+  const isFastAutoReplyEnabled = (session.featureFlags & FeatureFlags.FastAutoReplyFeature) !== 0;
 
   const toggleAutoReplyFeature = React.useCallback(async () => {
     setDisabled(true);
@@ -26,6 +28,16 @@ const ConversationCard: React.FC<{ session: Conversation; fetchData: () => void 
     await api.post('wechat/update/feature', {
       sessionId: session.id,
       feature: session.featureFlags ^ FeatureFlags.GptCompletionFeature,
+    });
+    fetchData();
+    setDisabled(false);
+  }, [fetchData, session.featureFlags, session.id]);
+
+  const toggleFastAutoReplyFeature = React.useCallback(async () => {
+    setDisabled(true);
+    await api.post('wechat/update/feature', {
+      sessionId: session.id,
+      feature: session.featureFlags ^ FeatureFlags.FastAutoReplyFeature,
     });
     fetchData();
     setDisabled(false);
@@ -69,6 +81,18 @@ const ConversationCard: React.FC<{ session: Conversation; fetchData: () => void 
         </button>
 
         <div className="flex items-center space-x-4">
+          <div className="flex items-center">
+            <button
+              onClick={toggleFastAutoReplyFeature}
+              disabled={disabled}
+              className={`rounded-full p-2 ${disabled ? 'bg-gray-300' : 'bg-blue-500 hover:bg-blue-700'}`}
+              aria-label="Toggle Fast Auto Reply Feature"
+            >
+              {isFastAutoReplyEnabled ? <FiToggleRight className="text-white" /> : <FaRobot className="text-white" />}
+            </button>
+            <span className="ml-2 text-sm font-semibold text-gray-700">Fast Reply</span>
+          </div>
+
           <div className="flex items-center">
             <button
               onClick={toggleAutoReplyFeature}

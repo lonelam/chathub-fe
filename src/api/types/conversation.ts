@@ -16,6 +16,7 @@ export interface Friend {
 export const FeatureFlags = {
   GptCompletionFeature: 1 << 0,
   AutoReplyFeature: 1 << 1,
+  FastAutoReplyFeature: 1 << 2,
 };
 
 export interface Conversation {
