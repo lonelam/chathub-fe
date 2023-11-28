@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import api from 'api';
 import { ConversationFace } from 'components/conversation-face';
 import { Conversation } from 'api/types/conversation';
-import { FiRefreshCw, FiArrowLeft, FiArrowRight, FiSend, FiLogOut } from 'react-icons/fi';
+import { FiRefreshCw, FiArrowLeft, FiArrowRight, FiSend, FiLogOut, FiHome } from 'react-icons/fi';
 import { NotFoundPage } from 'pages/not-found';
 export enum HeaderContentEnum {
   ConversationName = 0,
@@ -141,6 +141,10 @@ export const ChatPage = () => {
     }
   };
 
+  const handleGoHome = React.useCallback(() => {
+    navigate('/');
+  }, [navigate]);
+
   const handleLogout = React.useCallback(async () => {
     // Implement your logout logic here
     if (wechatId) {
@@ -167,6 +171,9 @@ export const ChatPage = () => {
           {headerContentStr}
         </h1>
         <div>
+          <button>
+            <FiHome onClick={handleGoHome} className="mx-1 text-white" />
+          </button>
           <button onClick={fetchChatSessions} className="mx-1 text-white">
             <FiRefreshCw className="animate-spin" />
           </button>
