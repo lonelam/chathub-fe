@@ -8,6 +8,7 @@ import { AdminPage } from 'pages/admin';
 import { StartPage } from 'pages/start';
 import { EntryPage } from 'pages/entry';
 import { ChatPage } from 'pages/chat';
+import { AdminDataContextProvider } from 'pages/admin/AdminDataContext';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -15,7 +16,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/admin',
-    element: <AdminPage />,
+    element: (
+      <AdminDataContextProvider>
+        <AdminPage />,
+      </AdminDataContextProvider>
+    ),
   },
   {
     path: '/start',
