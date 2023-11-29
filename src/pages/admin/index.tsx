@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { FaUpdate } from 'react-icons/fa'; // Import React Icons
 import api from 'api'; // Import your API configuration
 import { OpenAIToken, Token } from 'api/types/token';
 import { EditSystemMessages } from './EditSystemMessages';
