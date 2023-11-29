@@ -3,6 +3,7 @@ import api from 'api'; // Import your API configuration
 import { EditSystemMessages } from './EditSystemMessages';
 import { TokenList, baseUrlOptions } from './TokenList';
 import { AdminDataContext } from './AdminDataContext';
+import { ModelSelect } from './ModelSelect';
 
 export const AdminPage = () => {
   const { dataChanging, setDataChanging, fetchData, openAITokens, padLocalTokens } = React.useContext(AdminDataContext);
@@ -106,6 +107,7 @@ export const AdminPage = () => {
         <h2 className="mb-2 mt-4 flex items-center justify-between text-lg font-semibold">Chat Sessions</h2>
         <EditSystemMessages />
       </div>
+      <ModelSelect />
     </div>
   );
 };

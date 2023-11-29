@@ -28,6 +28,13 @@ export interface GetApiTypeMap {
       data: Conversation[];
     },
   ];
+  'openai/models': [
+    never,
+    {
+      lower: string;
+      higher: string;
+    },
+  ];
 }
 
 export interface PostApiTypeMap {
@@ -96,6 +103,16 @@ export interface PostApiTypeMap {
       feature: number;
     },
     never,
+  ];
+  'openai/models/update': [
+    {
+      lower: string;
+      higher: string;
+    },
+    {
+      lower: string;
+      higher: string;
+    },
   ];
 }
 export class ApiInstance extends AxiosInstance {
