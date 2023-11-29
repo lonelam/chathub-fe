@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { FaUpdate } from 'react-icons/fa'; // Import React Icons
 import api from 'api'; // Import your API configuration
-import { Token } from 'api/types/token';
+import { OpenAIToken, Token } from 'api/types/token';
 import { EditSystemMessages } from './EditSystemMessages';
 
 export const AdminPage = () => {
@@ -12,6 +13,7 @@ export const AdminPage = () => {
     'pad-local': false,
   });
   const [newTokenValue, setNewTokenValue] = useState('');
+  const [newTokenUrl, setNewTokenUrl] = useState('');
 
   const fetchData = async () => {
     try {
@@ -22,14 +24,17 @@ export const AdminPage = () => {
       console.error('Error fetching token data', error);
     }
   };
+
   const createToken = async (type: 'openai' | 'pad-local') => {
     try {
       setDataChanging(true);
-      await api.post(`token/create`, { token: newTokenValue, type }); // Adjust as needed
+      const payload = type === 'openai' ? { token: newTokenValue, baseUrl: newTokenUrl } : { token: newTokenValue };
+      await api.post(`token/create/${type}`, payload);
       await fetchData();
       setDataChanging(false);
       setShowTokenForm({ openai: false, 'pad-local': false });
       setNewTokenValue('');
+      setNewTokenUrl('');
     } catch (error) {
       console.error('Error creating token', error);
       setDataChanging(false);
@@ -69,6 +74,11 @@ export const AdminPage = () => {
         <div>
           <span className="font-semibold">ID:</span> {token.id} |<span className="font-semibold">Token:</span>{' '}
           {token.token}
+          {type === 'openai' && (
+            <span className="ml-2">
+              (<span className="font-semibold">URL:</span> {(token as OpenAIToken).baseUrl})
+            </span>
+          )}
         </div>
         <div className="form-control">
           <label className="label cursor-pointer">
@@ -94,6 +104,7 @@ export const AdminPage = () => {
       +
     </button>
   );
+
   const renderTokenForm = (type: 'openai' | 'pad-local') =>
     showTokenForm[type] && (
       <div className="mb-4">
@@ -104,15 +115,25 @@ export const AdminPage = () => {
           className="input input-bordered w-full max-w-xs"
           placeholder="Enter token value"
         />
+        {type === 'openai' && (
+          <input
+            type="text"
+            value={newTokenUrl}
+            onChange={(e) => setNewTokenUrl(e.target.value)}
+            className="input input-bordered mt-2 w-full max-w-xs"
+            placeholder="Enter Base URL"
+          />
+        )}
         <button
           onClick={() => createToken(type)}
           className="btn btn-success ml-2"
-          disabled={dataChanging || !newTokenValue}
+          disabled={dataChanging || !newTokenValue || (type === 'openai' && !newTokenUrl)}
         >
           Add Token
         </button>
       </div>
     );
+
   return (
     <div className="p-4">
       <h1 className="mb-4 text-xl font-bold">Token Management</h1>

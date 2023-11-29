@@ -1,5 +1,5 @@
 import type { AxiosInstance, AxiosResponse } from 'axios';
-import { Token } from './token';
+import { OpenAIToken, Token } from './token';
 import { WechatAccount } from './accounts';
 import { ExposedBot } from './bot';
 import { Conversation } from './conversation';
@@ -31,12 +31,28 @@ export interface GetApiTypeMap {
 }
 
 export interface PostApiTypeMap {
-  'token/create': [
+  'token/create/openai': [
     {
-      type: 'openai' | 'pad-local';
+      // type: 'openai' | 'pad-local';
+      token: string;
+      baseUrl: string;
+    },
+    Token,
+  ];
+
+  'token/create/pad-local': [
+    {
+      // type: 'openai' | 'pad-local';
       token: string;
     },
     Token,
+  ];
+  'token/update/openai': [
+    {
+      // type: 'openai' | 'pad-local';
+      data: OpenAIToken;
+    },
+    OpenAIToken,
   ];
   'wechat/start': [
     {},

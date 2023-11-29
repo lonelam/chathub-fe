@@ -85,10 +85,12 @@ const ConversationCard: React.FC<{ session: Conversation; fetchData: () => void 
             <button
               onClick={toggleFastAutoReplyFeature}
               disabled={disabled}
-              className={`rounded-full p-2 ${disabled ? 'bg-gray-300' : 'bg-blue-500 hover:bg-blue-700'}`}
+              className={`rounded-full p-2 ${
+                disabled ? 'bg-gray-300' : isFastAutoReplyEnabled ? 'bg-orange-400' : 'bg-blue-500 hover:bg-blue-700'
+              }`}
               aria-label="Toggle Fast Auto Reply Feature"
             >
-              {isFastAutoReplyEnabled ? <FiToggleRight className="text-white" /> : <FaRobot className="text-white" />}
+              {isFastAutoReplyEnabled ? <FaRobot className="text-white" /> : <FiToggleLeft className="text-white" />}
             </button>
             <span className="ml-2 text-sm font-semibold text-gray-700">Fast Reply</span>
           </div>

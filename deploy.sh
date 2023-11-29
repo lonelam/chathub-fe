@@ -5,7 +5,7 @@ BUILD_DIR="./build"
 
 # Server and path configurations
 SERVER_USER="root"
-SERVER_HOST="laizn.com"
+SERVER_HOST="chub.laizn.com"
 SERVER_PATH="/www/chathub"
 
 yarn build
