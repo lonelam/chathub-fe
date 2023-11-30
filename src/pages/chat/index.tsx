@@ -3,15 +3,17 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import api from 'api';
 import { ConversationFace } from 'components/conversation-face';
 import { Conversation } from 'api/types/conversation';
-import { FiRefreshCw, FiArrowLeft, FiArrowRight, FiSend, FiLogOut, FiHome } from 'react-icons/fi';
+import { FiRefreshCw, FiArrowLeft, FiArrowRight, FiSend, FiLogOut, FiHome, FiTool } from 'react-icons/fi';
 import { NotFoundPage } from 'pages/not-found';
 import { WechatAccount } from 'api/types/accounts';
-import { FaRobot } from 'react-icons/fa';
+import { FaRobot, FaUserFriends } from 'react-icons/fa';
+import { ChatList } from './ChatList';
 export enum HeaderContentEnum {
   ConversationName = 0,
   SystemMessage,
   ModulusNumber,
 }
+const MAX_INPUT_HEIGHT = 75;
 export const ChatPage = () => {
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [account, setAccount] = useState<WechatAccount | null>(null);
@@ -27,8 +29,41 @@ export const ChatPage = () => {
 
   const { id: wechatId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const selectedIndex = searchParams.get('s') || '0';
+  const [chatListExpand, setChatListExpand] = useState(false);
+
+  const selectedId = searchParams.get('id') || chatSessions[0]?.id?.toString();
+
   const navigate = useNavigate();
+
+  const handleInput = React.useCallback(() => {
+    const target = textareaRef.current;
+    if (!target) {
+      return;
+    }
+    target.style.height = 'auto';
+    target.style.height = `${Math.min(target.scrollHeight, MAX_INPUT_HEIGHT)}px`;
+  }, []);
+
+  React.useEffect(() => {
+    console.log(`selected id changed to ${selectedId}`);
+    setChatListExpand(false);
+    const selectedSession = chatSessions.find((s) => s.id?.toString() === selectedId);
+    if (selectedSession) {
+      setConversation(selectedSession);
+      setActiveMessage(selectedSession.activeMessage);
+      setTimeout(() => {
+        const target = chatScrollDivRef.current;
+        if (!target) {
+          return;
+        }
+        handleInput();
+        target.scrollTo({
+          top: target.scrollHeight,
+        });
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId]);
 
   const setActiveMessage = React.useCallback((msg: string) => {
     if (msg === lastSentMessage.current) {
@@ -52,15 +87,6 @@ export const ChatPage = () => {
     },
     [setActiveMessage],
   );
-
-  const handleInput = React.useCallback(() => {
-    const target = textareaRef.current;
-    if (!target) {
-      return;
-    }
-    target.style.height = 'auto';
-    target.style.height = `${Math.min(target.scrollHeight, 75)}px`;
-  }, []);
   const fetchChatSessions = React.useCallback(async () => {
     if (!wechatId) {
       return;
@@ -72,8 +98,8 @@ export const ChatPage = () => {
       });
 
       let selectedConversation: null | Conversation = response.data.chatSessions[0];
-      if (selectedIndex) {
-        selectedConversation = response.data.chatSessions[parseInt(selectedIndex)];
+      if (selectedId) {
+        selectedConversation = response.data.chatSessions.find((c) => c.id === parseInt(selectedId)) || null;
       }
       setConversation((prevConv) => {
         if (
@@ -105,7 +131,7 @@ export const ChatPage = () => {
     } catch (error) {
       console.error('Error fetching chat sessions:', error);
     }
-  }, [handleInput, selectedIndex, setActiveMessage, wechatId]);
+  }, [handleInput, selectedId, setActiveMessage, wechatId]);
 
   useEffect(() => {
     fetchChatSessions();
@@ -115,7 +141,7 @@ export const ChatPage = () => {
         clearInterval(intervalHandler);
       };
     }
-  }, [fetchChatSessions, wechatId, selectedIndex, refreshing]);
+  }, [fetchChatSessions, wechatId, refreshing]);
 
   const handleRefreshActiveMessageClick = React.useCallback(async () => {
     if (!conversation || !wechatId) {
@@ -175,6 +201,9 @@ export const ChatPage = () => {
     }
   };
 
+  const handleGoAdmin = React.useCallback(() => {
+    navigate('/admin');
+  }, [navigate]);
   const handleGoHome = React.useCallback(() => {
     navigate('/');
   }, [navigate]);
@@ -189,10 +218,9 @@ export const ChatPage = () => {
     navigate('/'); // Redirect to the login page after logout
   }, [navigate, wechatId]);
 
-  const onArrowClick = (add: number) => {
-    const currentIndex = parseInt(selectedIndex);
-    setSearchParams({ s: String(currentIndex + add) });
-  };
+  const handleChatListExpand = React.useCallback(() => {
+    setChatListExpand((c) => !c);
+  }, []);
 
   if (!conversation || !wechatId) {
     return null;
@@ -209,6 +237,9 @@ export const ChatPage = () => {
           {headerContentStr}
         </h1>
         <div>
+          <button onClick={handleGoAdmin} className="mx-1 text-white">
+            <FiTool />
+          </button>
           <button>
             <FiHome onClick={handleGoHome} className="mx-1 text-white" />
           </button>
@@ -227,21 +258,26 @@ export const ChatPage = () => {
           users={conversation.friends.concat([{ ...conversation.wechatAccount, id: -1 }])}
         />
       </div>
-      <div className="flex items-center justify-between bg-gray-100 p-4">
-        <button
-          onClick={onArrowClick.bind(null, -1)}
-          className="rounded-full bg-blue-500 p-2 text-white"
-          disabled={selectedIndex === '0'}
-        >
-          <FiArrowLeft />
+      <div className="relative flex items-center justify-between overflow-visible bg-gray-100 p-4">
+        <ChatList
+          className={`absolute left-1 top-0 max-w-[80%] -translate-y-full rounded bg-gray-100 p-2 ${
+            chatListExpand ? '' : 'hidden'
+          } overflow-scroll`}
+          style={{
+            maxHeight: `calc(100vh - ${MAX_INPUT_HEIGHT + 10}px)`,
+          }}
+          chatSessions={chatSessions}
+        />
+        <button className="rounded-full bg-blue-500 p-2 text-white" onClick={handleChatListExpand}>
+          <FaUserFriends />
         </button>
 
         <button
-          onClick={onArrowClick.bind(null, 1)}
-          className="rounded-full bg-blue-500 p-2 text-white"
-          disabled={selectedIndex === String(chatSessions.length - 1)}
+          disabled={gptCompleting}
+          onClick={handleRefreshActiveMessageClick}
+          className={`m-1 rounded-full ${gptCompleting ? 'bg-gray-500' : 'bg-orange-300'} p-2 text-white`}
         >
-          <FiArrowRight />
+          <FaRobot />
         </button>
         <textarea
           ref={textareaRef}
@@ -254,13 +290,6 @@ export const ChatPage = () => {
           placeholder="Type a message"
           rows={1}
         />
-        <button
-          disabled={gptCompleting}
-          onClick={handleRefreshActiveMessageClick}
-          className={`m-1 rounded-full ${gptCompleting ? 'bg-gray-500' : 'bg-orange-300'} p-2 text-white`}
-        >
-          <FaRobot />
-        </button>
         <button onClick={sayCurrentText} className="rounded-full bg-blue-500 p-2 text-white">
           <FiSend />
         </button>

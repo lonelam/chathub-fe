@@ -23,7 +23,9 @@ export const ConversationFace: React.FC<IConversationFaceProps> = ({ messages, u
                 className="mr-2 h-8 w-8 rounded-full" // Adjust the size as needed
               />
             )}
-            <div className={`rounded-lg p-2 ${isCurrentUser ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}>
+            <div
+              className={`rounded-lg p-2 ${isCurrentUser ? 'bg-blue-500 text-white' : 'bg-gray-100'} overflow-hidden`}
+            >
               {!isCurrentUser && <div className="text-sm text-gray-600">{user?.name}</div>}
               <div>{msg.textContent}</div>
             </div>
