@@ -2,12 +2,11 @@ import api from 'api';
 import { OpenAIToken, Token } from 'api/types/token';
 import React, { useState } from 'react';
 import { AdminDataContext } from './AdminDataContext';
+import { baseUrlOptions } from 'utils/constants';
 export interface ITokenListProps {
   tokens: Token[];
   type: 'openai' | 'pad-local';
 }
-
-export const baseUrlOptions = ['https://api.openai.com/v1', 'https://aiproxy.laizn.com/v1', 'https://api.gptapi.us/v1'];
 
 const TokenRow = ({ token, type }: { token: Token; type: 'openai' | 'pad-local' }) => {
   const { dataChanging, setDataChanging, fetchData } = React.useContext(AdminDataContext);

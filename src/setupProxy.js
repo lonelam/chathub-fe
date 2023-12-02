@@ -1,17 +1,13 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
-
+const dotenv = require('dotenv');
+// dotenv.config(['.env.local', '.env.development', '.env']);
 module.exports = function (app) {
   app.use(
-    // '/api',
-    // createProxyMiddleware({
-    //   target: 'http://localhost:3333',
-    //   changeOrigin: true,
-    // }),
     '/api',
     createProxyMiddleware({
-      target: 'https://chub.laizn.com',
+      target: process.env.SERVER_URL || 'http://localhost:3000',
       changeOrigin: true,
-      auth: 'chathubuser:chathub.123',
+      auth: process.env.SERVER_AUTH,
     }),
   );
 };

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from 'api'; // Import your API configuration
 import { EditSystemMessages } from './EditSystemMessages';
-import { TokenList, baseUrlOptions } from './TokenList';
+import { TokenList } from './TokenList';
 import { AdminDataContext } from './AdminDataContext';
 import { ModelSelect } from './ModelSelect';
+import { baseUrlOptions } from 'utils/constants';
 
 export const AdminPage = () => {
   const { dataChanging, setDataChanging, fetchData, openAITokens, padLocalTokens } = React.useContext(AdminDataContext);

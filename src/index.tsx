@@ -2,39 +2,15 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
+import { App } from 'App';
+import { BrowserRouter } from 'react-router-dom';
 
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import { AdminPage } from 'pages/admin';
-import { StartPage } from 'pages/start';
-import { EntryPage } from 'pages/entry';
-import { ChatPage } from 'pages/chat';
-import { AdminDataContextProvider } from 'pages/admin/AdminDataContext';
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <EntryPage />,
-  },
-  {
-    path: '/admin',
-    element: (
-      <AdminDataContextProvider>
-        <AdminPage />,
-      </AdminDataContextProvider>
-    ),
-  },
-  {
-    path: '/start',
-    element: <StartPage />,
-  },
-  {
-    path: '/chat/:id',
-    element: <ChatPage />,
-  },
-]);
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </React.StrictMode>,
 );
 

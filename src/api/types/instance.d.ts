@@ -22,6 +22,12 @@ export interface GetApiTypeMap {
       wechatAccount: WechatAccount | null;
     },
   ];
+  'wechat/sessions': [
+    never,
+    {
+      data: Conversation[];
+    },
+  ];
   'wechat/admin/sessions': [
     never,
     {
@@ -33,6 +39,12 @@ export interface GetApiTypeMap {
     {
       lower: string;
       higher: string;
+    },
+  ];
+  'auth/pre-login': [
+    never,
+    {
+      init: boolean;
     },
   ];
 }
@@ -51,6 +63,7 @@ export interface PostApiTypeMap {
     {
       // type: 'openai' | 'pad-local';
       token: string;
+      puppetType: string;
     },
     Token,
   ];
@@ -114,20 +127,38 @@ export interface PostApiTypeMap {
       higher: string;
     },
   ];
+  'auth/setup': [
+    {
+      password: string;
+      openai: { token: string; baseUrl: string };
+      padLocal: {
+        token: string;
+        puppetType: string;
+      };
+    },
+    {
+      user: User;
+    },
+  ];
+  'auth/login': [
+    {
+      username: string;
+      password: string;
+    },
+    {
+      user: User;
+    },
+  ];
 }
-export class ApiInstance extends AxiosInstance {
-  get<K extends keyof GetApiTypeMap>(
+export interface ApiInstance extends AxiosInstance {
+  get: <K extends keyof GetApiTypeMap>(
     url: K,
     config?: {
       params?: GetApiTypeMap[K][0];
     },
-  ): Promise<AxiosResponse<GetApiTypeMap[K][1]>> {
-    return super.get(url, { params });
-  }
-  post<K extends keyof PostApiTypeMap>(
+  ) => Promise<AxiosResponse<GetApiTypeMap[K][1]>>;
+  post: <K extends keyof PostApiTypeMap>(
     url: K,
     data?: PostApiTypeMap[K][0],
-  ): Promise<AxiosResponse<PostApiTypeMap[K][1]>> {
-    return super.post(url, data);
-  }
+  ) => Promise<AxiosResponse<PostApiTypeMap[K][1]>>;
 }
