@@ -22,9 +22,6 @@ export const useApiInterceptors = () => {
         }
       },
     );
-    return () => {
-      api.interceptors.response.eject(ejectId);
-    };
   }, [navigate]);
 };
 export default api;

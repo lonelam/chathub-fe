@@ -18,7 +18,10 @@ export const AdminPage = () => {
   const createToken = async (type: 'openai' | 'pad-local') => {
     try {
       setDataChanging(true);
-      const payload = type === 'openai' ? { token: newTokenValue, baseUrl: newTokenUrl } : { token: newTokenValue };
+      const payload =
+        type === 'openai'
+          ? { token: newTokenValue, baseUrl: newTokenUrl }
+          : { token: newTokenValue, puppetType: 'wechaty-puppet-padlocal' };
       await api.post(`token/create/${type}`, payload);
       await fetchData();
       setDataChanging(false);
