@@ -149,6 +149,21 @@ export interface PostApiTypeMap {
       user: User;
     },
   ];
+  'auth/register': [
+    {
+      username: string;
+      password: string;
+    },
+    {
+      user: User;
+    },
+  ];
+  'auth/logout': [
+    never,
+    {
+      message: string;
+    },
+  ];
 }
 export interface ApiInstance extends AxiosInstance {
   get: <K extends keyof GetApiTypeMap>(
