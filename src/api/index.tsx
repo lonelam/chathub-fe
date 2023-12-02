@@ -9,19 +9,23 @@ export const api = axios.create({
 
 export const useApiInterceptors = () => {
   const navigate = useNavigate();
-  React.useEffect(() => {
-    const ejectId = api.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        const { status } = error.response;
-        if (status === 401) {
-          navigate('/login');
-          return {};
-        } else {
-          return Promise.reject(error);
-        }
-      },
-    );
-  }, [navigate]);
+  console.log(`should only execute once`);
+  api.interceptors.response.use(
+    (response) => {
+      if (response.status === 401) {
+        navigate('/login');
+      }
+      return response;
+    },
+    (error) => {
+      const { status } = error.response;
+      if (status === 401) {
+        navigate('/login');
+        return {};
+      } else {
+        return Promise.reject(error);
+      }
+    },
+  );
 };
 export default api;
