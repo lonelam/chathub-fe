@@ -1,6 +1,7 @@
 import api from 'api';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { FaLock, FaUserAlt } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import { baseUrlOptions } from 'utils/constants';
 
 const SetupPage = () => {
@@ -12,7 +13,7 @@ const SetupPage = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [validationMessage, setValidationMessage] = useState('');
-
+  const navigate = useNavigate();
   const handleSkipAuthChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const target = e.target;
     setIsSkipAuth(target.checked);
@@ -48,6 +49,7 @@ const SetupPage = () => {
         .then((resp) => {
           if (resp.status === 200) {
             console.log(`success, data: `, resp.data);
+            navigate('/');
           }
         })
         .catch();
@@ -56,8 +58,20 @@ const SetupPage = () => {
       console.log({ openAIToken, wechatyToken, puppetType });
       // Additional logic to handle the submission
     },
-    [baseUrl, confirmPassword, isSkipAuth, openAIToken, password, puppetType, wechatyToken],
+    [baseUrl, confirmPassword, isSkipAuth, navigate, openAIToken, password, puppetType, wechatyToken],
   );
+
+  const handlePuppetTypeChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
+    if (event.target.value === 'wechaty-puppet-wechat') {
+      setWechatyToken((p) => {
+        if (!p) {
+          return 'Need no token';
+        }
+        return p;
+      });
+    }
+    setPuppetType(event.target.value);
+  }, []);
 
   return (
     <div className="container mx-auto p-4">
@@ -161,24 +175,35 @@ const SetupPage = () => {
             </span>
             <span className="link-primary p-2">
               <a href="http://pad-local.com/#/login" target="_blank" rel="noreferrer">
-                PadLocal体验7天
+                收费方案PadLocal体验7天
               </a>
             </span>
+            <span className="link-primary p-2">
+              <a href="https://github.com/wechaty/puppet-wechat/issues/222" target="_blank" rel="noreferrer">
+                免费选择wechaty-puppet-wechat，无须token，有封号风险
+              </a>
+            </span>
+            {/* <span className="link-primary p-2">
+              <a href="https://github.com/wechaty/puppet-xp" target="_blank" rel="noreferrer">
+                最优免费方案是用xp，点此了解
+              </a>
+            </span> */}
           </label>
           <div className="flex gap-2">
             <select
               value={puppetType}
-              onChange={(e) => setPuppetType(e.target.value)}
+              onChange={handlePuppetTypeChange}
               className="focus:shadow-outline select select-bordered w-48 rounded border leading-tight text-gray-700 shadow hover:cursor-pointer focus:outline-none"
             >
               <option value="">Select Puppet Type</option>
               <option value="wechaty-puppet-padlocal">wechaty-puppet-padlocal</option>
-              <option value="wechaty-puppet-xp">wechaty-puppet-xp</option>
               <option value="wechaty-puppet-wechat">wechaty-puppet-wechat</option>
+              {/* <option value="wechaty-puppet-xp">wechaty-puppet-xp</option> */}
             </select>
             <input
               type="text"
               value={wechatyToken}
+              disabled={puppetType === 'wechaty-puppet-wechat'}
               onChange={(e) => setWechatyToken(e.target.value)}
               placeholder="Enter Wechaty Token (可以空着，需要后续在管理面板自行添加)"
               className="focus:shadow-outline flex-1 appearance-none rounded border px-3 py-2 leading-tight text-gray-700 shadow focus:outline-none"

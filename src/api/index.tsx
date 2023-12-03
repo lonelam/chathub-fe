@@ -9,23 +9,27 @@ export const api = axios.create({
 
 export const useApiInterceptors = () => {
   const navigate = useNavigate();
-  console.log(`should only execute once`);
-  api.interceptors.response.use(
-    (response) => {
-      if (response.status === 401) {
-        navigate('/login');
-      }
-      return response;
-    },
-    (error) => {
-      const { status } = error.response;
-      if (status === 401) {
-        navigate('/login');
-        return {};
-      } else {
-        return Promise.reject(error);
-      }
-    },
-  );
+  const [unauthorized, setUnauthorized] = React.useState(false);
+  React.useEffect(() => {
+    if (unauthorized) {
+      navigate('/login');
+    }
+  }, [unauthorized]);
+  React.useEffect(() => {
+    api.interceptors.response.use(
+      (response) => {
+        return response;
+      },
+      (error) => {
+        const { status } = error.response;
+        if (status === 401) {
+          setUnauthorized(true);
+          return {};
+        } else {
+          return Promise.reject(error);
+        }
+      },
+    );
+  });
 };
 export default api;
