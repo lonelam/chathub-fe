@@ -30,4 +30,3 @@ jobs:
         with:
           push: true
           tags: lonelam/chathub-fe:latest
-          build-args: BACKEND_HOST=${{ env.BACKEND_HOST }}
