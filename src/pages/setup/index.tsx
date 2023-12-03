@@ -120,7 +120,15 @@ const SetupPage = () => {
         </div>
 
         <div className="mb-4">
-          <label className="mb-2 block text-sm font-bold text-gray-700">OpenAI Token</label>
+          <label className="mb-2 block text-sm font-bold text-gray-700">
+            OpenAI Token
+            <span className="link-primary p-2">
+              <a href="https://www.gptapi.us/register?aff=S7lC" target="_blank" rel="noreferrer">
+                没有的点这里注册，免费额度$1
+              </a>
+            </span>
+          </label>
+
           <div className="flex gap-2">
             <select
               value={baseUrl}

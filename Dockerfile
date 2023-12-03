@@ -12,7 +12,7 @@ FROM nginx:alpine
 # Copy the build output from the previous stage
 COPY --from=build-stage /app/build /usr/share/nginx/html
 # Copy Nginx configuration file (if you have a custom one)
-COPY scripts/nginx.conf /etc/nginx/conf.d/nginx.conf
+COPY scripts/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 
 COPY ./scripts/start.sh /start.sh

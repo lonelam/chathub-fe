@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useContext } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import api from 'api';
 import { ConversationFace } from 'components/conversation-face';
@@ -8,6 +8,7 @@ import { NotFoundPage } from 'pages/not-found';
 import { WechatAccount } from 'api/types/accounts';
 import { FaRobot, FaUserFriends } from 'react-icons/fa';
 import { ChatList } from './ChatList';
+import { ChatDataContext } from './ChatDataContext';
 export enum HeaderContentEnum {
   ConversationName = 0,
   SystemMessage,
@@ -15,12 +16,10 @@ export enum HeaderContentEnum {
 }
 const MAX_INPUT_HEIGHT = 75;
 export const ChatPage = () => {
+  const { chatSessions, refreshing, setRefreshing, account, updateConversation } = useContext(ChatDataContext);
   const [conversation, setConversation] = useState<Conversation | null>(null);
-  const [account, setAccount] = useState<WechatAccount | null>(null);
-  const [chatSessions, setChatSessions] = useState<Conversation[]>([]);
   const [activeMessage, _setActiveMessage] = useState('');
   const [headerContentType, _setHeaderContentType] = useState(0);
-  const [refreshing, setRefreshing] = useState(true);
   const [gptCompleting, setGptCompleting] = useState(false);
   const lastInputActiveTime = useRef(0);
   const lastSentMessage = useRef('');
@@ -87,19 +86,11 @@ export const ChatPage = () => {
     },
     [setActiveMessage],
   );
-  const fetchChatSessions = React.useCallback(async () => {
-    if (!wechatId) {
-      return;
-    }
-
+  useEffect(() => {
     try {
-      const response = await api.get('wechat/chat-sessions', {
-        params: { wechat_id: wechatId },
-      });
-
-      let selectedConversation: null | Conversation = response.data.chatSessions[0];
+      let selectedConversation: null | Conversation = chatSessions[0];
       if (selectedId) {
-        selectedConversation = response.data.chatSessions.find((c) => c.id === parseInt(selectedId)) || null;
+        selectedConversation = chatSessions.find((c) => c.id === parseInt(selectedId)) || null;
       }
       setConversation((prevConv) => {
         if (
@@ -126,48 +117,29 @@ export const ChatPage = () => {
         setActiveMessage(selectedConversation.activeMessage);
         setTimeout(handleInput);
       }
-      setAccount(response.data.wechatAccount);
-      setChatSessions(response.data.chatSessions);
     } catch (error) {
       console.error('Error fetching chat sessions:', error);
     }
-  }, [handleInput, selectedId, setActiveMessage, wechatId]);
-
-  useEffect(() => {
-    fetchChatSessions();
-    if (refreshing) {
-      const intervalHandler = setInterval(fetchChatSessions, 5000);
-      return () => {
-        clearInterval(intervalHandler);
-      };
-    }
-  }, [fetchChatSessions, wechatId, refreshing]);
+  }, [chatSessions, handleInput, selectedId, setActiveMessage]);
 
   const handleRefreshActiveMessageClick = React.useCallback(async () => {
-    if (!conversation || !wechatId) {
+    if (!conversation) {
       return;
     }
     try {
       setGptCompleting(true);
       const { data } = await api.post('wechat/complete-chat-session', { sessionId: conversation.id });
+      updateConversation(data.data);
       setConversation(data.data);
       setActiveMessage(data.data.activeMessage);
-      setChatSessions(
-        chatSessions.map((c) => {
-          if (c.id === data.data.id) {
-            return { ...c, activeMessage: data.data.activeMessage };
-          }
-          return c;
-        }),
-      );
     } catch (err) {
       console.error(err);
     }
     setGptCompleting(false);
-  }, [chatSessions, conversation, setActiveMessage, wechatId]);
+  }, [conversation, setActiveMessage, updateConversation]);
   const handleRefreshClick = React.useCallback(() => {
     setRefreshing((r) => !r);
-  }, []);
+  }, [setRefreshing]);
 
   const headerContentStr = useMemo(() => {
     if (!conversation) {

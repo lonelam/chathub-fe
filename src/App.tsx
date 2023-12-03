@@ -9,6 +9,7 @@ import { AdminDataContextProvider } from 'pages/admin/AdminDataContext';
 import LoginPage from 'pages/login';
 import RegisterPage from 'pages/register';
 import SetupPage from 'pages/setup';
+import { ChatDataContextProvider } from 'pages/chat/ChatDataContext';
 export const App: React.FC = () => {
   useApiInterceptors();
   return (
@@ -26,7 +27,14 @@ export const App: React.FC = () => {
         }
       />
       <Route path="/start" element={<StartPage />} />
-      <Route path="/chat/:id" element={<ChatPage />} />
+      <Route
+        path="/chat/:id"
+        element={
+          <ChatDataContextProvider>
+            <ChatPage />
+          </ChatDataContextProvider>
+        }
+      />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
